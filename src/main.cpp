@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL.h>
-
+#include "Ball.h"
+#include "Paddle.h"
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 bool running = true;
@@ -15,6 +16,14 @@ int main(int argc, char* args[]) {
 	SDL_Window* gameWindow = SDL_CreateWindow("Pong", 300, 150, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	SDL_Renderer* renderer  = SDL_CreateRenderer(gameWindow, -1, 0);
 	SDL_Event event;
+
+	//Create ball
+	Ball ball(Vector2((WINDOW_WIDTH / 2.0f) - (BALL_WIDTH / 2.0f), (WINDOW_HEIGHT / 2.0f) - (BALL_WIDTH/2.0f)));
+
+
+	//CreatePaddle
+	Paddle paddle1(Vector2(50.0f, (WINDOW_HEIGHT / 2.0f) - (PADDLE_HEIGHT / 2.0f)));
+	Paddle paddle2(Vector2(WINDOW_WIDTH - 50.0f, (WINDOW_HEIGHT / 2.0f) - PADDLE_HEIGHT / 2.0f));
 
 
 	//Game loop
@@ -41,7 +50,9 @@ int main(int argc, char* args[]) {
 			}
 		}
 
-
+		ball.DrawBall(renderer);
+		paddle1.DrawPaddle(renderer);
+		paddle2.DrawPaddle(renderer);
 		SDL_RenderPresent(renderer);
 	}
 

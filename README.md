@@ -4,7 +4,7 @@
 It is a personal project I created while learning about SDL and C++.<br>
 
 # How to use 
-You can clone the repository and run it on any IDE or launch the executable `PongGameClone.exe` at `\bin\x64\Debug`. <br>
+You can clone the repository and run it on any IDE or launch the executable `PongGameClone.exe` inside the zip folder `PongGame.zip`. <br>
 I only built and ran it on Windows 10, but SDL2 is multiplatform, so you should be able to get it to build on anything so long as you understand your local OS's build system.
 
 # Pong game
@@ -19,7 +19,7 @@ It is a pong clone where I wanted to create a game without a game engine with C+
 - I divided my project in different files. The entry point is `main.cpp`
 - You can find all my code inside the `src` folder.
 - All the resources used are located inside `Assets` folder.
-- You can find an executable in `bin/x64/Debug/`.
+- You can find an executable in the zip folder `PongGame.zip`.
 
 ## Librairies used
 I have used the following librairies : 

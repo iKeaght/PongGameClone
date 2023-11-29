@@ -12,11 +12,13 @@ namespace Utils {
 		None,
 		Top,
 		Middle,
-		Bottom
+		Bottom,
+		Left,
+		Right,
 	};
 
 	struct Contact {
 		CollisionType type;
-		float penetration;
+		float penetrationAmount;
 	};
 }

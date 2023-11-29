@@ -1,4 +1,6 @@
 #include "Paddle.h"
+#include "Utils.h"
+
 Paddle::Paddle(Vector2 position, Vector2 velocity) : position(position), velocity(velocity) {
 	rect.x = static_cast<int> (position.x);
 	rect.y = static_cast<int> (position.y);

@@ -1,7 +1,6 @@
 #pragma once
 #include "Vector2.h"
 #include "SDL.h"
-#include "Utils.h"
 
 
 class Paddle {

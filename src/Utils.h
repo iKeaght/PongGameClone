@@ -6,4 +6,6 @@ namespace Utils {
 	const int PADDLE_HEIGHT = 100;
 	const int BALL_WIDTH = 15;
 	const int BALL_HEIGHT = 15;
+	const float PADDLE_SPEED = 1.0f;
+	const float BALL_SPEED = 1.0f;
 }

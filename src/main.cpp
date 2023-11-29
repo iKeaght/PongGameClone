@@ -4,6 +4,7 @@
 #include "Ball.h"
 #include "Paddle.h"
 #include "PlayerScore.h"
+#include "Utils.h"
 #include <chrono>
 bool running = true;
 float deltaTime = 0.0f;
@@ -13,8 +14,42 @@ enum Buttons {
 	Paddle2Up,
 	Paddle2Down,
 };
-const float PADDLE_SPEED = 1.0f;
+
 bool buttons[4] = {};
+//Using Separating Axis Theorem (SAT) for checks
+bool CheckPaddleCollisions(Ball const& ball, Paddle const& paddle) {
+	float ballLeft = ball.position.x;
+	float ballRight = ball.position.x + Utils::BALL_WIDTH;
+	float ballTop = ball.position.y;
+	float ballBottom = ball.position.y + Utils::BALL_HEIGHT;
+
+	float paddleLeft = paddle.position.x;
+	float paddleRight = paddle.position.x + Utils::PADDLE_WIDTH;
+	float paddleTop = paddle.position.y;
+	float paddleBottom = paddle.position.y + Utils::PADDLE_HEIGHT;
+
+	if (ballLeft >= paddleRight)
+	{
+		return false;
+	}
+
+	if (ballRight <= paddleLeft)
+	{
+		return false;
+	}
+
+	if (ballTop >= paddleBottom)
+	{
+		return false;
+	}
+
+	if (ballBottom <= paddleTop)
+	{
+		return false;
+	}
+	return true;
+}
+
 int main(int argc, char* args[]) {
 	
 	//Initialisation
@@ -34,7 +69,7 @@ int main(int argc, char* args[]) {
 	PlayerScore player2ScoreText(Vector2(3 * Utils::WINDOW_WIDTH / 4, 20), renderer, font);
 
 	//Create ball
-	Ball ball(Vector2((Utils::WINDOW_WIDTH / 2.0f) - (Utils::BALL_WIDTH / 2.0f), (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::BALL_WIDTH/2.0f)));
+	Ball ball(Vector2((Utils::WINDOW_WIDTH / 2.0f) - (Utils::BALL_WIDTH / 2.0f), (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::BALL_WIDTH/2.0f)), Vector2(Utils::BALL_SPEED, 0.0f));
 
 	//CreatePaddle
 	Paddle paddle1(Vector2(50.0f, (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::PADDLE_HEIGHT / 2.0f)), Vector2(0.0f, 0.0f));
@@ -92,11 +127,11 @@ int main(int argc, char* args[]) {
 
 		if (buttons[Buttons::Paddle1Up])
 		{
-			paddle1.velocity.y = -PADDLE_SPEED;
+			paddle1.velocity.y = -Utils::PADDLE_SPEED;
 		}
 		else if (buttons[Buttons::Paddle1Down])
 		{
-			paddle1.velocity.y = PADDLE_SPEED;
+			paddle1.velocity.y = Utils::PADDLE_SPEED;
 		}
 		else
 		{
@@ -105,11 +140,11 @@ int main(int argc, char* args[]) {
 
 		if (buttons[Buttons::Paddle2Up])
 		{
-			paddle2.velocity.y = -PADDLE_SPEED;
+			paddle2.velocity.y = -Utils::PADDLE_SPEED;
 		}
 		else if (buttons[Buttons::Paddle2Down])
 		{
-			paddle2.velocity.y = PADDLE_SPEED;
+			paddle2.velocity.y = Utils::PADDLE_SPEED;
 		}
 		else
 		{
@@ -118,8 +153,11 @@ int main(int argc, char* args[]) {
 
 		paddle1.Update(deltaTime);
 		paddle2.Update(deltaTime);
+		ball.Update(deltaTime);
 
-
+		if (CheckPaddleCollisions(ball, paddle1) || CheckPaddleCollisions(ball, paddle2)) {
+			ball.velocity.x = -ball.velocity.x;
+		}
 
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		SDL_RenderClear(renderer);

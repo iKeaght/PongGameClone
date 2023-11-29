@@ -1,11 +1,17 @@
 #include "Ball.h"
+#include "Utils.h"
 
 
-Ball::Ball(Vector2 position) : position(position) {
+Ball::Ball(Vector2 position, Vector2 velocity) : position(position), velocity(velocity) {
 	rect.x = static_cast<int> (position.x);
 	rect.y = static_cast<int> (position.y);
 	rect.w = Utils::BALL_WIDTH;
 	rect.h = Utils::BALL_HEIGHT;
+}
+
+void Ball::Update(float deltaTime)
+{
+	position += velocity * deltaTime;
 }
 
 void Ball::DrawBall(SDL_Renderer* renderer) {

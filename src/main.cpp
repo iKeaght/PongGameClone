@@ -8,6 +8,8 @@
 #include <chrono>
 bool running = true;
 float deltaTime = 0.0f;
+int player1Score = 0;
+int player2Score = 0;
 enum Buttons {
 	Paddle1Up,
 	Paddle1Down,
@@ -213,6 +215,19 @@ int main(int argc, char* args[]) {
 		}
 		else if (contactWalls.type != Utils::CollisionType::None) {
 			ball.CollideWithWalls(contactWalls);
+
+			if (contactWalls.type == Utils::CollisionType::Left)
+			{
+				++player2Score;
+
+				player2ScoreText.SetScore(player2Score);
+			}
+			else if (contactWalls.type == Utils::CollisionType::Right)
+			{
+				++player1Score;
+
+				player1ScoreText.SetScore(player1Score);
+			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);

@@ -147,6 +147,7 @@
     <ClInclude Include="src\PlayerScore.h" />
     <ClInclude Include="src\Ball.h" />
     <ClInclude Include="src\Paddle.h" />
+    <ClInclude Include="src\Utils.h" />
     <ClInclude Include="src\Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

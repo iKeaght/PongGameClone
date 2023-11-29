@@ -4,10 +4,17 @@
 #include "Ball.h"
 #include "Paddle.h"
 #include "PlayerScore.h"
-const int WINDOW_WIDTH = 1920;
-const int WINDOW_HEIGHT = 1080;
+#include <chrono>
 bool running = true;
-
+float deltaTime = 0.0f;
+enum Buttons {
+	Paddle1Up,
+	Paddle1Down,
+	Paddle2Up,
+	Paddle2Down,
+};
+const float PADDLE_SPEED = 1.0f;
+bool buttons[4] = {};
 int main(int argc, char* args[]) {
 	
 	//Initialisation
@@ -17,25 +24,26 @@ int main(int argc, char* args[]) {
 	};
 
 	TTF_Init();
-	SDL_Window* gameWindow = SDL_CreateWindow("Pong", 300, 150, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+	SDL_Window* gameWindow = SDL_CreateWindow("Pong", 300, 150, Utils::WINDOW_WIDTH, Utils::WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	SDL_Renderer* renderer  = SDL_CreateRenderer(gameWindow, -1, 0);
 	SDL_Event event;
 
 	//Score
 	TTF_Font* font = TTF_OpenFont("./Assets/font/Roboto-Black.ttf", 40);
-	PlayerScore player1ScoreText(Vector2(WINDOW_WIDTH / 4, 20), renderer, font);
-	PlayerScore player2ScoreText(Vector2(3 * WINDOW_WIDTH / 4, 20), renderer, font);
+	PlayerScore player1ScoreText(Vector2(Utils::WINDOW_WIDTH / 4, 20), renderer, font);
+	PlayerScore player2ScoreText(Vector2(3 * Utils::WINDOW_WIDTH / 4, 20), renderer, font);
 
 	//Create ball
-	Ball ball(Vector2((WINDOW_WIDTH / 2.0f) - (BALL_WIDTH / 2.0f), (WINDOW_HEIGHT / 2.0f) - (BALL_WIDTH/2.0f)));
+	Ball ball(Vector2((Utils::WINDOW_WIDTH / 2.0f) - (Utils::BALL_WIDTH / 2.0f), (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::BALL_WIDTH/2.0f)));
 
 	//CreatePaddle
-	Paddle paddle1(Vector2(50.0f, (WINDOW_HEIGHT / 2.0f) - (PADDLE_HEIGHT / 2.0f)));
-	Paddle paddle2(Vector2(WINDOW_WIDTH - 50.0f, (WINDOW_HEIGHT / 2.0f) - PADDLE_HEIGHT / 2.0f));
+	Paddle paddle1(Vector2(50.0f, (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::PADDLE_HEIGHT / 2.0f)), Vector2(0.0f, 0.0f));
+	Paddle paddle2(Vector2(Utils::WINDOW_WIDTH - 50.0f, (Utils::WINDOW_HEIGHT / 2.0f) - Utils::PADDLE_HEIGHT / 2.0f), Vector2(0.0f, 0.0f));
 
 
 	//Game loop
 	while (running) {
+		auto startTime = std::chrono::high_resolution_clock::now();
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
 				running = false;
@@ -44,17 +52,83 @@ int main(int argc, char* args[]) {
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					running = false;
 				}
+				else if (event.key.keysym.sym == SDLK_z)
+				{
+					buttons[Buttons::Paddle1Up] = true;
+				}
+				else if (event.key.keysym.sym == SDLK_s)
+				{
+					buttons[Buttons::Paddle1Down] = true;
+				}
+				else if (event.key.keysym.sym == SDLK_UP)
+				{
+					buttons[Buttons::Paddle2Up] = true;
+				}
+				else if (event.key.keysym.sym == SDLK_DOWN)
+				{
+					buttons[Buttons::Paddle2Down] = true;
+				}
+			}
+			else if (event.type == SDL_KEYUP)
+			{
+				if (event.key.keysym.sym == SDLK_z)
+				{
+					buttons[Buttons::Paddle1Up] = false;
+				}
+				else if (event.key.keysym.sym == SDLK_s)
+				{
+					buttons[Buttons::Paddle1Down] = false;
+				}
+				else if (event.key.keysym.sym == SDLK_UP)
+				{
+					buttons[Buttons::Paddle2Up] = false;
+				}
+				else if (event.key.keysym.sym == SDLK_DOWN)
+				{
+					buttons[Buttons::Paddle2Down] = false;
+				}
 			}
 		}
+
+		if (buttons[Buttons::Paddle1Up])
+		{
+			paddle1.velocity.y = -PADDLE_SPEED;
+		}
+		else if (buttons[Buttons::Paddle1Down])
+		{
+			paddle1.velocity.y = PADDLE_SPEED;
+		}
+		else
+		{
+			paddle1.velocity.y = 0.0f;
+		}
+
+		if (buttons[Buttons::Paddle2Up])
+		{
+			paddle2.velocity.y = -PADDLE_SPEED;
+		}
+		else if (buttons[Buttons::Paddle2Down])
+		{
+			paddle2.velocity.y = PADDLE_SPEED;
+		}
+		else
+		{
+			paddle2.velocity.y = 0.0f;
+		}
+
+		paddle1.Update(deltaTime);
+		paddle2.Update(deltaTime);
+
+
 
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		SDL_RenderClear(renderer);
 
 		//Draw middle bar
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		for (int y = 0; y < WINDOW_HEIGHT; y++) {
+		for (int y = 0; y < Utils::WINDOW_HEIGHT; y++) {
 			if (y % 5) {
-				SDL_RenderDrawPoint(renderer, WINDOW_WIDTH / 2, y);
+				SDL_RenderDrawPoint(renderer, Utils::WINDOW_WIDTH / 2, y);
 			}
 		}
 
@@ -65,6 +139,10 @@ int main(int argc, char* args[]) {
 		player1ScoreText.Draw();
 		player2ScoreText.Draw();
 		SDL_RenderPresent(renderer);
+
+
+		auto stopTime = std::chrono::high_resolution_clock::now();
+		deltaTime = std::chrono::duration<float, std::chrono::milliseconds::period>(stopTime - startTime).count();
 	}
 
 	//Clean up

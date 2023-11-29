@@ -14,10 +14,10 @@ enum Buttons {
 	Paddle2Up,
 	Paddle2Down,
 };
-
 bool buttons[4] = {};
+
 //Using Separating Axis Theorem (SAT) for checks
-bool CheckPaddleCollisions(Ball const& ball, Paddle const& paddle) {
+Utils::Contact CheckPaddleCollisions(Ball const& ball, Paddle const& paddle) {
 	float ballLeft = ball.position.x;
 	float ballRight = ball.position.x + Utils::BALL_WIDTH;
 	float ballTop = ball.position.y;
@@ -28,30 +28,53 @@ bool CheckPaddleCollisions(Ball const& ball, Paddle const& paddle) {
 	float paddleTop = paddle.position.y;
 	float paddleBottom = paddle.position.y + Utils::PADDLE_HEIGHT;
 
+	Utils::Contact contact{};
 	if (ballLeft >= paddleRight)
 	{
-		return false;
+		return contact;
 	}
 
 	if (ballRight <= paddleLeft)
 	{
-		return false;
+		return contact;
 	}
 
 	if (ballTop >= paddleBottom)
 	{
-		return false;
+		return contact;
 	}
 
 	if (ballBottom <= paddleTop)
 	{
-		return false;
+		return contact;
 	}
-	return true;
+	float paddleRangeUpper = paddleBottom - (2.0f * Utils::PADDLE_HEIGHT / 3.0f);
+	float paddleRangeMiddle = paddleBottom - (Utils::PADDLE_HEIGHT / 3.0f);
+	//left side
+	if (ball.velocity.x < 0) {
+		contact.penetration = paddleRight - ballLeft;
+	}
+	//right side of the screen
+	else if (ball.velocity.x > 0) {
+		contact.penetration = paddleLeft - ballRight;
+	}
+
+	if ((ballBottom > paddleTop) && (ballBottom < paddleRangeUpper)) {
+		contact.type = Utils::CollisionType::Top;
+	}
+	else if ((ballBottom > paddleRangeUpper) && (ballBottom < paddleRangeMiddle)) {
+		contact.type = Utils::CollisionType::Middle;
+	}
+	else {
+		contact.type = Utils::CollisionType::Bottom;
+	}
+
+
+	return contact;
 }
 
 int main(int argc, char* args[]) {
-	
+
 	//Initialisation
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		std::cout << "Error with SDL_Init : " << SDL_GetError() << std::endl;
@@ -60,7 +83,7 @@ int main(int argc, char* args[]) {
 
 	TTF_Init();
 	SDL_Window* gameWindow = SDL_CreateWindow("Pong", 300, 150, Utils::WINDOW_WIDTH, Utils::WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
-	SDL_Renderer* renderer  = SDL_CreateRenderer(gameWindow, -1, 0);
+	SDL_Renderer* renderer = SDL_CreateRenderer(gameWindow, -1, 0);
 	SDL_Event event;
 
 	//Score
@@ -69,7 +92,7 @@ int main(int argc, char* args[]) {
 	PlayerScore player2ScoreText(Vector2(3 * Utils::WINDOW_WIDTH / 4, 20), renderer, font);
 
 	//Create ball
-	Ball ball(Vector2((Utils::WINDOW_WIDTH / 2.0f) - (Utils::BALL_WIDTH / 2.0f), (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::BALL_WIDTH/2.0f)), Vector2(Utils::BALL_SPEED, 0.0f));
+	Ball ball(Vector2((Utils::WINDOW_WIDTH / 2.0f) - (Utils::BALL_WIDTH / 2.0f), (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::BALL_WIDTH / 2.0f)), Vector2(Utils::BALL_SPEED, 0.0f));
 
 	//CreatePaddle
 	Paddle paddle1(Vector2(50.0f, (Utils::WINDOW_HEIGHT / 2.0f) - (Utils::PADDLE_HEIGHT / 2.0f)), Vector2(0.0f, 0.0f));
@@ -83,7 +106,7 @@ int main(int argc, char* args[]) {
 			if (event.type == SDL_QUIT) {
 				running = false;
 			}
-			else if(event.type == SDL_KEYDOWN) {
+			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					running = false;
 				}
@@ -155,8 +178,13 @@ int main(int argc, char* args[]) {
 		paddle2.Update(deltaTime);
 		ball.Update(deltaTime);
 
-		if (CheckPaddleCollisions(ball, paddle1) || CheckPaddleCollisions(ball, paddle2)) {
-			ball.velocity.x = -ball.velocity.x;
+		Utils::Contact contact1 = CheckPaddleCollisions(ball, paddle1);
+		Utils::Contact contact2 = CheckPaddleCollisions(ball, paddle2);
+		if (contact1.type != Utils::CollisionType::None) {
+			ball.CollideWithPaddle(contact1);
+		}
+		else if (contact2.type != Utils::CollisionType::None) {
+			ball.CollideWithPaddle(contact2);
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);

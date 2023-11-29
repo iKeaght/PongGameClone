@@ -8,4 +8,15 @@ namespace Utils {
 	const int BALL_HEIGHT = 15;
 	const float PADDLE_SPEED = 1.0f;
 	const float BALL_SPEED = 1.0f;
+	enum class CollisionType {
+		None,
+		Top,
+		Middle,
+		Bottom
+	};
+
+	struct Contact {
+		CollisionType type;
+		float penetration;
+	};
 }
